@@ -87,7 +87,7 @@ def get_all_normal_items():
 def get_items_info(normal_items):
     counter = 0
     f = open ("output.csv","w")
-    f.write("Released,Members,Quest item,Tradeable,Equipable,Stackable,Options,Destory,Examine,Alch value,High alch,Low alch,Weight,Price,Buy limit,Daily volume,Category\n")
+    f.write("Released,Members,Quest item,Tradeable,Equipable,Stackable,Options,Destory,Examine,Value,High alch,Low alch,Weight,Price,Buy limit,Daily volume,Category\n")
     for name in normal_items[:50]:
         keys = []
         values = []
@@ -99,17 +99,27 @@ def get_items_info(normal_items):
         table = soup.find('table',{'class':'infobox-item'})
         table_body = table.find('tbody')
         rows = table_body.find_all('tr')
+
+        dict_items = dict()
         
         for row in rows:
 
             children = row.findChildren(recursive=False)
             if len(children) == 2:
-                keys += [x.getText() for x in row.find_all('th')]
-                values += [x.getText() for x in row.find_all('td')]
+                keys = [x.getText() for x in row.find_all('th')]
+                values = [x.getText() for x in row.find_all('td')]
+
+                for key,value in zip(keys,values):
+                    dict_items[key] = value
 
         counter=counter+1
-        item_data = {keys[i]:values[i] for i in range(len(keys))}
-        f.write(f'{item_data["Released"]},{item_data["Members"]},{item_data["Quest item"]},{item_data["Tradeable"]},{item_data["Stackable"]},{item_data["Options"]},{item_data["Destory"]},{item_data["Examine"]},{item_data["Value"]},{item_data["High alch"]},{item_data["Low alch"]},{item_data["Weight"]},{item_data["Exchange"]},{item_data["Buy limit"]},{item_data["Daily volume"]}\n')
+        with open('keys.json','r') as w:
+            item_data = json.load(w)
+
+        for i,key in enumerate(dict_items):
+            item_data[key] = dict_items[key].replace(',','')
+
+        f.write(f'{item_data["Released"]},{item_data["Members"]},{item_data["Quest item"]},{item_data["Tradeable"]},{item_data["Equipable"]},{item_data["Stackable"]},{item_data["Options"]},{item_data["Destroy"]},{item_data["Examine"]},{item_data["Value"]},{item_data["High alch"]},{item_data["Low alch"]},{item_data["Weight"]},{item_data["Exchange"]},{item_data["Buy limit"]},{item_data["Daily volume"]},{None}\n')
     f.close()
     #print(counter)
     #print(item_data)
